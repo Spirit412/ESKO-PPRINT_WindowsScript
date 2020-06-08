@@ -117,7 +117,11 @@ except:
     logger.error(u'не правильные атрибуты XLS файла. Ошибка функции readNameCell')
 
 table = str.maketrans("", "", "?()!@#/$%^&*+|+\:;[]{}<>")
-# список запрещённых символов в названии файла.
+"""
+список запрещённых символов в названии файла.
+"""
+
+
 JobNamber = str(readNameCell('JobNamber', xls_file)[4]).replace(".0", "")
 # удаляем запрещенные символы из номера заказа
 JobNamber = JobNamber.translate(table).replace(".0", "")

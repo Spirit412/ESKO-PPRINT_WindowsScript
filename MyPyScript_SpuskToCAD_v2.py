@@ -1,47 +1,63 @@
 import argparse
-import pymysql
 import xlrd
 import os
 import shutil
 from xml.dom import minidom
+import ConMySQL
 import logging
-
 
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
 
+# START настройка чтения конфиг файла
 config = configparser.ConfigParser()  # создаём объекта парсера
-config.read("config.ini")  # читаем конфиг
+thisfolder = os.path.dirname(os.path.abspath(__file__))
+inifile = os.path.join(thisfolder, 'config.ini')
+config.read(inifile)  # читаем конфиг
+# END настройка чтения конфиг файла
 
- # inputs, outputFolder, params
+# inputs, outputFolder, params
 parser = argparse.ArgumentParser(description='inputs, outputFolder')
 parser.add_argument('inputs', type=str, help='Input dir for xls file')
 parser.add_argument('outputFolder', type=str, help='Output dir for xml file')
 args = parser.parse_args()
 logFile = str(args.outputFolder + "\\log.txt")
 print(logFile)
-logging.basicConfig(
-    format = u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
-    level = logging.DEBUG,
-    filename = logFile,
-    filemode='w'
-)
 
+# START настройка логгирования модуля и основного скрипта
 
-# print(args.inputs)
-# print(args.outputFolder)
+logger = logging.getLogger('основной')
+logger2 = logging.getLogger('ConMySQL')
+logger3 = logging.getLogger('основной')
 
+logger.setLevel(logging.INFO)
+logger2.setLevel(logging.INFO)
+logger3.setLevel(logging.INFO)
 
+# create the logging file handler
+fh = logging.FileHandler(logFile, 'w', 'windows-1251')
+fh2 = logging.FileHandler(logFile, 'a+', 'windows-1251')
+fh3 = logging.FileHandler(logFile, 'a+', 'windows-1251')
+
+formatter = logging.Formatter(u'[%(asctime)s] - %(filename)s - [LINE:%(lineno)d]# - %(levelname)4s - %(message)s')
+formatter2 = logging.Formatter(u'[%(asctime)s] - %(filename)s - [LINE:%(lineno)d]# - %(levelname)4s - %(message)s')
+formatter3 = logging.Formatter(u'%(message)s')
+fh.setFormatter(formatter)
+fh2.setFormatter(formatter2)
+fh3.setFormatter(formatter3)
+
+# add handler to logger object
+logger.addHandler(fh)
+logger2.addHandler(fh)
+logger3.addHandler(fh3)
 
 xls_file = args.inputs
 xls_workbook = xlrd.open_workbook(str(xls_file))
 xls_sheet = xls_workbook.sheet_by_index(0)
 
 
-# Параметры из XLS файла в переменные.
-# простая функция запроса к данным именной ячейки
 def readNameCell(nameCell, xls):
     """
     Функция получает на входе имя ячейки и адрес XLS файла
@@ -63,11 +79,7 @@ def readNameCell(nameCell, xls):
     return (r)
 
 
-logging.info(u'проверка')
-logging.error(u'проверка')
-
-
-
+# START чтение данных из XLS файла в переменные
 JobNamber = readNameCell('JobNamber', xls_file)[4].strip()
 CustomerName = readNameCell('CustomerName', xls_file)[4].strip()
 CutTools = readNameCell('CutTools', xls_file)[4].strip()
@@ -79,52 +91,73 @@ DieShape = "file://server-esko/AE_BASE/CUT-TOOLS/" + CutTools + ".cf2"
 DieShapeMFG = "file://server-esko/AE_BASE/CUT-TOOLS/" + CutTools + ".MFG"
 Bleed = str(readNameCell('Bleed', xls_file)[4]).strip()
 Bleed = Bleed.replace('.', ',')
+# END чтение данных из XLS файла в переменные
+
+
 # Подключиться к базе данных.
-try:
-    connection = pymysql.connect(host='esko',
-                                 user='root',
-                                 port=3360,
-                                 password='',
-                                 db='pprint',
-                                 charset='utf8',
-                                 cursorclass=pymysql.cursors.DictCursor)
-    with open(logFile, "w", encoding='utf8') as f:
-        f.write("connect successful!!")
-        f.close()
 
+# Подключиться к базе данных и получить словарь всех данных параметра.
+try:
+    CutTool = ConMySQL.get(CutTools)
 except:
-    # запись в лог файл
-    with open(logFile, "w", encoding='utf8') as f:
-        f.write("ERROR connect MySQL")
-        f.close()
-
+    logger.info('нет соединения с БД')
+# START ------------------------Вывод данных таблицей в лог файл--------------------------------#
+# создаём дубликат словаря длоя оформления таблици в логе
 try:
-    with connection.cursor() as cursor:
-        # SQL
-        cursor.execute("SELECT * FROM tools  WHERE IDCUT=(%s)", (CutTools))
-        # Получаем результат сделанного запроса к БД MySQL
-    rows = cursor.fetchall()
-    # print()
-    #    s.replace(',', '.')
-    for row in rows:
-        Zub = row['zub']
-        DPrint = row['HPrint']
-        Polimer = row['HPolimer']
-        Distorsia = row['HDist']
-        # для полимера 1.7
-        Polimer17 = row['Hpolimer_17']
-        Distorsia17 = row['Hdist_17']
-        Vsheet = row['Vsheet']
+    d1 = {**CutTool}
+except NameError:
+    logger.error("Ошибка: {}".format(NameError))
+    exit()
+# словарь замены ключей
+replacements = {'ID': 'ID', 'IDCUT': 'Штамп', 'zub': 'зуб', 'HPrint': 'длина печати',
+                'HPolimer': 'Длина полимера 1.14', 'Hpolimer_17': 'Длина полимера 1.7',
+                'Vsheet': 'Высота штампа', 'HCountItem': 'Эт-к по длине',
+                'VCountItem': 'Эт-к по ширина'}
+# цикл замены ключей в словаре.
+for i in list(d1):
+    if i in replacements:
+        d1[replacements[i]] = d1.pop(i)
 
-        HCountItem = row['HCountItem']
-        VCountItem = row['VCountItem']
+logger3.info(str('\t' + 'Таблица данных из БД на штамп ' + CutTool['IDCUT']))
 
-        # отступы
-        HGap = row['HGap']
-        VGap = row['VGap']
-finally:
-    # Закрыть соединение (Close connection).
-    connection.close()
+for key, value in d1.items():
+    tab = 2
+    probelkey = 5
+    probelvalue = 5
+    if str(key).__len__() < 30:
+        probelkey = int(30 - str(key).__len__())
+    else:
+        probelkey = 0
+    if str(value).__len__() < 10:
+        probelvalue = int(10 - str(value).__len__())
+    else:
+        probelvalue = 0
+    logger3.info('| ' + key + str(probelkey * '. ') + '  ->  ' + str(value) + str(probelvalue * ' ') + ' |')
+
+# END ------------------------Вывод данных таблицей в лог файл--------------------------------#
+
+
+
+Zub = CutTool['zub']
+DPrint = CutTool['HPrint']
+Polimer = CutTool['HPolimer']
+Distorsia = round((Polimer / DPrint) * 100, 4)
+# для полимера 1.7
+Polimer17 = CutTool['Hpolimer_17']
+Distorsia17 = round((Polimer17 / DPrint) * 100, 4)
+Vsheet = CutTool['Vsheet']
+
+HCountItem = CutTool['HCountItem']
+VCountItem = CutTool['VCountItem']
+
+# отступы
+HGap = CutTool['HGap']
+VGap = CutTool['VGap']
+
+
+
+
+
 
 
 # определяем способ заполнения штампа строками/столбцами
@@ -136,7 +169,6 @@ if Razmeshenie == "строки":
 else:
     SequenceDirection = "v"
     Quantity = VCountItem
-
 
 doc = minidom.Document()
 root = doc.createElement('JOBS')
@@ -273,7 +305,6 @@ while x != "IndexError":
     except IndexError:
         break
 
-
 # делаем папку inPDF с проверкой
 InPDFfolder = os.path.dirname(args.inputs) + "\\inPDF"
 if os.path.exists(InPDFfolder) != True:
@@ -296,8 +327,7 @@ while x != "IndexError":
     leaf.appendChild(text)
     root.appendChild(leaf)
 
-
-    #копируем файлы в папку .../inPDF/
+    # копируем файлы в папку .../inPDF/
     cr = xls_sheet.cell(x, 1).value.strip()
     if os.path.isabs(cr) == True:
         shutil.copy(cr, InPDFfolder)
@@ -308,7 +338,7 @@ while x != "IndexError":
         cr = xls_sheet.cell(x, 1).value
     except IndexError:
         break
-# input("Press Enter to continue...")
+
 # делаем папку JobNumber_spusk с проверкой
 FolderJobNumber = args.outputFolder
 if os.path.exists(FolderJobNumber) != True:
@@ -317,10 +347,6 @@ print(FolderJobNumber)
 xml_out = FolderJobNumber + "\\" + str(JobNamber).strip() + ".xml"
 print(xml_out)
 # xml_out = "C:\\Temp\\"+ str(JobNamber) + ".xml"
-
-
-
-
 
 
 xml_str = doc.toprettyxml(indent="  ")
