@@ -1,13 +1,13 @@
 import argparse
-import ConMySQL
 import logging
-import pymysql
+
+import ConMySQL
 
 # inputs, outputFolder, params
-parser = argparse.ArgumentParser(description='inputs, outputFolder')
-parser.add_argument('inputs', type=str, help='Input dir for xls file')
-parser.add_argument('outputFolder', type=str, help='Output dir for xml file')
-args = parser.parse_args()
+# parser = argparse.ArgumentParser(description='inputs, outputFolder')
+# parser.add_argument('inputs', type=str, help='Input dir for xls file')
+# parser.add_argument('outputFolder', type=str, help='Output dir for xml file')
+# args = parser.parse_args()
 
 
 
