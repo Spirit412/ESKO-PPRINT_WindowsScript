@@ -11,12 +11,18 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
+
+
+
+
+
 # START настройка чтения конфиг файла
 config = configparser.ConfigParser()  # создаём объекта парсера
 thisfolder = os.path.dirname(os.path.abspath(__file__))
 inifile = os.path.join(thisfolder, 'config.ini')
 config.read(inifile)  # читаем конфиг
 # END настройка чтения конфиг файла
+
 
 # inputs, outputFolder, params
 parser = argparse.ArgumentParser(description='inputs, outputFolder')

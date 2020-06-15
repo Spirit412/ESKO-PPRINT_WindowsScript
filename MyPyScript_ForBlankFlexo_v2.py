@@ -2,7 +2,7 @@ import argparse
 import xlrd
 from xml.dom import minidom
 
- # inputs, outputFolder, params
+# inputs, outputFolder, params
 parser = argparse.ArgumentParser(description='inputs, outputFolder')
 parser.add_argument('inputs', type=str, help='Input dir for xls file')
 parser.add_argument('outputFolder', type=str, help='Output dir for xml file')
@@ -12,8 +12,6 @@ print(args.inputs)
 print(args.outputFolder)
 
 xls_file = args.inputs
-
-
 
 xls_workbook = xlrd.open_workbook(str(xls_file))
 xls_sheet = xls_workbook.sheet_by_index(0)
@@ -41,9 +39,10 @@ def readNameCell(nameCell, xls):
     r[4] = nameObj.cell().value
     return (r)
 
-table = str.maketrans("", "", "()!@#$%^&*+|+\/:;[]{}<>") #список запрещённых символов в названии файла.
+
+table = str.maketrans("", "", "()!@#$%^&*+|+\/:;[]{}<>")  # список запрещённых символов в названии файла.
 JobNamber = str(readNameCell('Номер_заказа', xls_file)[4]).strip().replace(".0", "")
-JobNamber = JobNamber.translate(table) #удаляем запрещенные символы из номера заказа
+JobNamber = JobNamber.translate(table)  # удаляем запрещенные символы из номера заказа
 print(JobNamber)
 
 CustomerName = readNameCell('Заказчик', xls_file)[4].strip()
@@ -60,10 +59,10 @@ if komment == "":
     komment = "нет"
 
 try:
-    Dvtulka = int(readNameCell('Dvtulka', xls_file)[4])
+    Dvtulka = str(readNameCell('Dvtulka', xls_file)[4]).strip().replace(".0", "")
     if Dvtulka == "":
         Dvtulka = " 76 / 40 "
-except AttributeError:
+except AttributeError or ValueError:
     Dvtulka = " 76 / 40 "
 try:
     Vrulone = readNameCell('Vrulone', xls_file)[4]
@@ -249,7 +248,7 @@ leaf.appendChild(text)
 root.appendChild(leaf)
 
 leaf = doc.createElement('WindingFile')
-text = doc.createTextNode("Winding_" + str(Winding) + ".pdf" )
+text = doc.createTextNode("Winding_" + str(Winding) + ".pdf")
 leaf.appendChild(text)
 root.appendChild(leaf)
 
@@ -323,24 +322,24 @@ root.appendChild(job)
 yy = ["нов", "нов.", "новая", "new"]
 SummNewForm = 0
 iID = 1
-x = readNameCell('FirstColor', xls_file)[0] # возвращаем номер строки первой ячейки в таблице дизайнов
+x = readNameCell('FirstColor', xls_file)[0]  # возвращаем номер строки первой ячейки в таблице дизайнов
 while x != "IndexError":
     ColorName = ""
     cr = xls_sheet.cell(x, 1).value.strip()
     textTest = cr
 
     leaf = doc.createElement('Ink')
-    leaf.setAttribute("ID" , str(iID))
+    leaf.setAttribute("ID", str(iID))
 
     ColorName = str(xls_sheet.cell(x, 1).value.strip())
     if ColorName == "":
         ColorName = "NaN"
     leaf.setAttribute("ColorName", ColorName)
 
-    leaf.setAttribute("Frequency", str(xls_sheet.cell(x, 2).value).replace(".0", "")) # удаляем из строки ".0"
-    leaf.setAttribute("Angle", str(xls_sheet.cell(x, 3).value).replace(".0", "")) # удаляем из строки ".0"
-    leaf.setAttribute("InkParam", str(xls_sheet.cell(x, 4).value).strip(' ')) #удаляем пробелы вначале/конце строки
-    if str(xls_sheet.cell(x, 4).value) in yy: # идет сравнение со значениями элементов массива yy
+    leaf.setAttribute("Frequency", str(xls_sheet.cell(x, 2).value).replace(".0", ""))  # удаляем из строки ".0"
+    leaf.setAttribute("Angle", str(xls_sheet.cell(x, 3).value).replace(".0", ""))  # удаляем из строки ".0"
+    leaf.setAttribute("InkParam", str(xls_sheet.cell(x, 4).value).strip(' '))  # удаляем пробелы вначале/конце строки
+    if str(xls_sheet.cell(x, 4).value) in yy:  # идет сравнение со значениями элементов массива yy
         SummNewForm += 1
     text = doc.createTextNode(textTest)
     leaf.appendChild(text)
@@ -357,8 +356,6 @@ leaf = doc.createElement('SummNewForm')
 text = doc.createTextNode(str(SummNewForm))
 leaf.appendChild(text)
 root.appendChild(leaf)
-
-
 
 xml_out = args.outputFolder + "\\" + str(JobNamber).replace(".0", "") + ".xml"
 # xml_out = outputFolder + "\\" + str(JobNamber) + ".xml"

@@ -1,36 +1,21 @@
 import argparse
-import xlrd
-from xml.dom import minidom
-import sys
+import logging
 import os
 import shutil
-import pymysql
-
-import ConMySQL
-import configparser
-
-import logging
-
-# reportlab - генерация PDF
-from reportlab.lib.units import mm
-from reportlab.lib.colors import PCMYKColor, PCMYKColorSep, CMYKColor, opaqueColor
-from reportlab.pdfgen.canvas import Canvas
 from random import randint
+import xlrd
+from reportlab.lib.colors import PCMYKColorSep
+from reportlab.lib.units import mm
+from reportlab.pdfgen.canvas import Canvas
 
-# inputs, outputFolder, params
+from xml.dom import minidom
+import ConMySQL
+
 try:
-    parser = argparse.ArgumentParser(description='inputs, outputFolder')
-    parser.add_argument('inputs', type=str, help='Input dir for xls file')
-    parser.add_argument('outputFolder', type=str, help='Output dir for xml file')
-    args = parser.parse_args()
-except:
-    logging.error(u'Ошибка в аргументах к PY файлу')
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
-# args.outputFolder = args.outputFolder.replace('"', '')
-inputsFolder = os.path.dirname(args.inputs)
-
-outputFolder = args.outputFolder
-logFile = outputFolder + "\\log.txt"
 
 # START настройка чтения конфиг файла
 config = configparser.ConfigParser()  # создаём объекта парсера
@@ -38,6 +23,21 @@ thisfolder = os.path.dirname(os.path.abspath(__file__))
 inifile = os.path.join(thisfolder, 'config.ini')
 config.read(inifile)  # читаем конфиг
 # END настройка чтения конфиг файла
+
+
+# inputs, outputFolder, params
+parser = argparse.ArgumentParser(description='inputs, outputFolder')
+parser.add_argument('inputs', type=str, help='Input dir for xls file')
+parser.add_argument('outputFolder', type=str, help='Output dir for xml file')
+args = parser.parse_args()
+logFile = str(args.outputFolder + "\\log.txt")
+print(logFile)
+
+
+inputsFolder = os.path.dirname(args.inputs)
+
+outputFolder = args.outputFolder
+
 
 
 # START настройка логгирования модуля и основного скрипта
@@ -143,6 +143,21 @@ BotOffset = readNameCell('BotOffset', xls_file)[4]
 psFile = readNameCell('psFile', xls_file)[4]
 onebitTiff = readNameCell('onebitTiff', xls_file)[4]
 addDGC = readNameCell('addDGC', xls_file)[4]
+
+
+try:
+    a = ['X', 'x', 'Х', 'х']
+    mirror_layout = readNameCell('mirror_layout', xls_file)[4]
+    if mirror_layout.strip() in a:
+        mirror_layout = 'X'
+    else:
+        mirror_layout = ''
+
+except AttributeError:
+    logger.info('в XLS файле отсутствует именная ячейка mirror_layout')
+    mirror_layout = ''
+
+
 try:
     OutFileName = readNameCell('OutFileName', xls_file)[4]
 except AttributeError:
@@ -366,6 +381,11 @@ root.appendChild(leaf)
 
 leaf = doc.createElement('addDGC')
 text = doc.createTextNode(str(addDGC))
+leaf.appendChild(text)
+root.appendChild(leaf)
+
+leaf = doc.createElement('mirror_layout')
+text = doc.createTextNode(str(mirror_layout))
 leaf.appendChild(text)
 root.appendChild(leaf)
 
@@ -654,7 +674,14 @@ PageX = int(3.5 * SumLenColorPole)
 PageY = 3.5
 # print(' Высота страницы ' + str(PageY) + " mm")
 
-c = Canvas(outputFolder + "\\" + "MarkColorPole.pdf", (PageX * mm, PageY * mm))
+path_MarkColorPole = r'\spusk\relsi\BT'
+"""
+путь до папки куда скидывается файл MarkColorPole.pdf
+"""
+if os.path.exists(outputFolder + path_MarkColorPole) != True:
+    os.makedirs(outputFolder + path_MarkColorPole, mode=0o777)
+
+c = Canvas(outputFolder + path_MarkColorPole + "\MarkColorPole.pdf", (PageX * mm, PageY * mm))
 
 y = readNameCell('relcolor1', xls_file)[0]  # возвращаем номер строки первой ячейки в таблице дизайнов
 x = readNameCell('relcolor1', xls_file)[1]  # возвращаем номер столбца первой ячейки в таблице дизайнов
