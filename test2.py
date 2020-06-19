@@ -1,11 +1,6 @@
-y = ['X', 'x', 'Х', 'х']
-x = 'х'
+result, a = [], [2, 5, 8]
+for i in a:
+    i = i * 2
+    result.append(i)
+print(result)
 
-if x in y:
-    print("X = ", x)
-else:
-    print('нет такого значения')
-
-
-# while (x in y):
-#     print("X = ", x)
