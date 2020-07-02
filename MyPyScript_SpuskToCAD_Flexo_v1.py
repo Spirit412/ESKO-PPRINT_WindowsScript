@@ -74,8 +74,8 @@ PrintMashine = readNameCell('PrintMashine', xls_file)[4]
 ThicknessPolymer = readNameCell('ThicknessPolymer', xls_file)[4]
 print(ThicknessPolymer)
 TypyPolimer = readNameCell('TypyPolimer', xls_file)[4] #Тип полимера
-DieShape = "file://server-esko/AE_BASE/CUT-TOOLS/" + CutTools + ".cf2"
-DieShapeMFG = "file://server-esko/AE_BASE/CUT-TOOLS/" + CutTools + ".MFG"
+DieShape = "file://esko/AE_BASE/CUT-TOOLS/" + CutTools + ".cf2"
+DieShapeMFG = "file://esko/AE_BASE/CUT-TOOLS/" + CutTools + ".MFG"
 Bleed = str(readNameCell('Bleed', xls_file)[4])
 Bleed = Bleed.replace('.', ',')
 PositionMark_6x4 = readNameCell('PositionMark_6x4', xls_file)[4] #Положение метки или её отсутствие

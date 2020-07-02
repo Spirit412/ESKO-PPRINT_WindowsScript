@@ -7,15 +7,6 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 from PyPDF2.pdf import PageObject
 import PyPDF2
 
-# inputs, outputFolder, params
-
-parser = argparse.ArgumentParser(description='inputs, outputFolder')
-parser.add_argument('inputs', type=str, help='Input dir for xls file')
-parser.add_argument('outputFolder', type=str, help='Output dir')
-args = parser.parse_args()
-
-xls_file = args.inputs
-
 
 def create_pdf_marks_layers(url_xml):
     # Поиск в XML с помощью XPath
@@ -172,19 +163,17 @@ def create_pdf_marks_layers(url_xml):
     ######################################### END генерируем PDF ###########################################
 
 
-create_pdf_marks_layers(xls_file)
-#
-# if __name__ == "__main__":
-#     url_path = '\\\\esko\\ae_base\CUT-TOOLS'
-#     listOfFiles = os.listdir(url_path)
-#     pattern = "*.xml"
-#     xml = []
-#     for entry in listOfFiles:
-#         if fnmatch.fnmatch(entry, pattern):
-#             if entry:
-#                 xml.append(entry)
-#     print(xml)
-#     for file in xml:
-#         print('==  ' * 40)
-#         a = r'\\esko\ae_base\CUT-TOOLS'
-#         create_pdf_marks_layers(url_xml='{}\{}'.format(a, file))
+if __name__ == "__main__":
+    url_path = '\\\\esko\\ae_base\CUT-TOOLS'
+    listOfFiles = os.listdir(url_path)
+    pattern = "*.xml"
+    xml = []
+    for entry in listOfFiles:
+        if fnmatch.fnmatch(entry, pattern):
+            if entry:
+                xml.append(entry)
+    print(xml)
+    for file in xml:
+        print('==  ' * 40)
+        a = r'\\esko\ae_base\CUT-TOOLS'
+        create_pdf_marks_layers(url_xml='{}\{}'.format(a, file))

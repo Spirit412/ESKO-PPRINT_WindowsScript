@@ -93,8 +93,8 @@ StampManufacturer = readNameCell('StampManufacturer', xls_file)[4].strip()
 Liniatura = readNameCell('Liniatura', xls_file)[4]
 PrintMashine = readNameCell('PrintMashine', xls_file)[4]
 ThicknessPolymer = readNameCell('ThicknessPolymer', xls_file)[4]
-DieShape = "file://server-esko/AE_BASE/CUT-TOOLS/" + CutTools + ".cf2"
-DieShapeMFG = "file://server-esko/AE_BASE/CUT-TOOLS/" + CutTools + ".MFG"
+DieShape = "file://esko/AE_BASE/CUT-TOOLS/" + CutTools + ".cf2"
+DieShapeMFG = "file://esko/AE_BASE/CUT-TOOLS/" + CutTools + ".MFG"
 Bleed = str(readNameCell('Bleed', xls_file)[4]).strip()
 Bleed = Bleed.replace('.', ',')
 # END чтение данных из XLS файла в переменные
