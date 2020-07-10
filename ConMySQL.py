@@ -3,6 +3,7 @@ import logging
 import configparser
 import os
 
+
 def get(cut_tool):
     """
 Подключение к БД MySQL. Настройки подключения внутри класса

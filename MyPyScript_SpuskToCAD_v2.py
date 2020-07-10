@@ -127,18 +127,19 @@ for i in list(d1):
 logger3.info(str('\t' + 'Таблица данных из БД на штамп ' + CutTool['IDCUT']))
 
 for key, value in d1.items():
-    tab = 2
-    probelkey = 5
-    probelvalue = 5
-    if str(key).__len__() < 30:
-        probelkey = int(30 - str(key).__len__())
-    else:
-        probelkey = 0
-    if str(value).__len__() < 10:
-        probelvalue = int(10 - str(value).__len__())
-    else:
-        probelvalue = 0
-    logger3.info('| ' + key + str(probelkey * '. ') + '  ->  ' + str(value) + str(probelvalue * ' ') + ' |')
+    # tab = 2
+    # probelkey = 5
+    # probelvalue = 5
+    # if str(key).__len__() < 30:
+    #     probelkey = int(30 - str(key).__len__())
+    # else:
+    #     probelkey = 0
+    # if str(value).__len__() < 10:
+    #     probelvalue = int(10 - str(value).__len__())
+    # else:
+    #     probelvalue = 0
+    # logger3.info('| ' + key + str(probelkey * '. ') + '  ->  ' + str(value) + str(probelvalue * ' ') + ' |')
+    logger3.info('| {key:_<15}{value:_>15} |\t\n'.format(key=key, value=value))
 
 # END ------------------------Вывод данных таблицей в лог файл--------------------------------#
 
