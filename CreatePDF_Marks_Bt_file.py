@@ -111,8 +111,9 @@ def create_pdf_marks_layers(url_xml):
 
     ## PyPDF2 работает с размерами в пунктах 1/72 ps дюйма в мм = 25,4/72
     big_page = PageObject.createBlankPage(None, bpw, bph)
-
-    if len(colom_coord_list()) >= 1 and len(row_coord_list()) > 1:
+    if offset_row() < 1 and offset_col() <1 and len(row_coord_list()) > 1:
+        pass
+    elif len(colom_coord_list()) >= 1 and len(row_coord_list()) > 1:
         # крест на нижний-правый угол верхней-левой этикетки
         tx = ((colom_coord_list()[0] + size_up['width']) / mm_to_pt) - mark_size_pt['width'] / 2
         tx += (offset_col() / 2) / mm_to_pt

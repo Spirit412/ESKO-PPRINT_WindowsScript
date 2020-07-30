@@ -78,12 +78,12 @@ def create_pdf_marks_layers(url_xml):
     # 1 дюйм = 72, 0000000000005
     # пункт НИС / PostScript 1 пункт НИС / PostScript = 0.3527777777778 миллиметр
     ######################################### START генерируем PDF ###########################################
-    # if __name__ == "__main__":
-    #     bigpage = '\\\esko\\ae_base\\TEMP-Shuttle-IN\\' + cut_name[:-4] + '_Mark_TEST.pdf'
-    # else:
-    #     bigpage = args.outputFolder + "\\" + cut_name[:-4] + '_mark.pdf'
+    if __name__ == "__main__":
+        bigpage = '\\\esko\\ae_base\\TEMP-Shuttle-IN\\' + cut_name[:-4] + '_Mark_TEST.pdf'
+    else:
+        bigpage = args.outputFolder + "\\" + cut_name[:-4] + '_mark.pdf'
 
-    bigpage = args.outputFolder + "\\" + '2_mark_bt.pdf'
+    # bigpage = args.outputFolder + "\\" + '2_mark_bt.pdf'
     mark_url = r'\\esko\bg_data_marks_v010\dat\krest_for_bottom layer_layout.pdf'
     mm_to_pt = 25.4 / 72
     """
@@ -102,8 +102,9 @@ def create_pdf_marks_layers(url_xml):
 
     ## PyPDF2 работает с размерами в пунктах 1/72 ps дюйма в мм = 25,4/72
     big_page = PageObject.createBlankPage(None, bpw, bph)
-
-    if len(colom_coord_list()) >= 1 and len(row_coord_list()) > 1:
+    if offset_row() < 1 and offset_col() <1 and len(row_coord_list()) > 1:
+        pass
+    elif len(colom_coord_list()) >= 1 and len(row_coord_list()) > 1:
         # крест на нижний-правый угол верхней-левой этикетки
         tx = ((colom_coord_list()[0] + size_up['width']) / mm_to_pt) - mark_size_pt['width'] / 2
         tx += (offset_col() / 2) / mm_to_pt
